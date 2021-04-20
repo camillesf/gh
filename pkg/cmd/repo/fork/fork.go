@@ -154,6 +154,17 @@ func forkRun(opts *ForkOptions) error {
 				return fmt.Errorf("argument error: %w", err)
 			}
 		}
+
+		if remotes, err := opts.Remotes(); err ==  nil {
+			// Here, inParent becomes true if opts.Repository happens to be an existing remote.
+			host := repoToFork.RepoHost()
+			owner := repoToFork.RepoOwner()
+			name := repoToFork.RepoName()
+
+			candidates := remotes.FilterByHosts([]string{host})
+			matchingRemote, _ := candidates.FindByRepo(owner, name)
+			inParent = matchingRemote != nil
+		}
 	}
 
 	connectedToTerminal := opts.IO.IsStdoutTTY() && opts.IO.IsStderrTTY() && opts.IO.IsStdinTTY()
